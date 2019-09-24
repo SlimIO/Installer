@@ -40,10 +40,11 @@ async function initAgent(location, options = {}) {
         name: "agent", token
     });
 
-    await mkdir(join(agentDir, "addons"));
+    const addonsDir = join(agentDir, "addons");
+    await mkdir(addonsDir, { recursive: true });
     await Promise.all([
         installDependencies(agentDir, true),
-        ...BUILT_IN_ADDONS.map((name) => installAddon(name, agentDir, { token }))
+        ...BUILT_IN_ADDONS.map((name) => installAddon(name, addonsDir, { token }))
     ]);
 
     return agentDir;
