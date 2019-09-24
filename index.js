@@ -121,7 +121,7 @@ async function renameDirFromManifest(dir = process.cwd(), fileName = "slimio.tom
  * @param {boolean} [options.installDependencies=true]
  * @param {boolean} [options.forceMkdir=true]
  * @param {string} [options.token]
- * @returns {Promise<void>}
+ * @returns {Promise<string>}
  */
 async function installAddon(addonName, dest, options = {}) {
     const { installDependencies: iDep = true, forceMkdir = true, token } = options;
@@ -146,6 +146,8 @@ async function installAddon(addonName, dest, options = {}) {
             subProcess.once("error", reject);
         });
     }
+
+    return addonDir;
 }
 
 module.exports = {

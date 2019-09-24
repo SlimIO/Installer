@@ -15,7 +15,7 @@ declare namespace Installer {
     export function installDependencies(cwd?: string, lock?: boolean): NodeJS.ReadableStream;
     export function renameDirFromManifest(dir?: string, fileName?: string): Promise<string>;
     export function extractAgent(dest: string, options?: ExtractOptions): Promise<string>;
-    export function installAddon(addonName: string, dest: string, options?: InstallOptions): Promise<void>;
+    export function installAddon(addonName: string, dest: string, options?: InstallOptions): Promise<string>;
 
     export namespace CONSTANTS {
         export const BUILT_IN_ADDONS: string[];
