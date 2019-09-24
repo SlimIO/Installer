@@ -19,7 +19,9 @@
         "test"
     ],
     "files": [
-        "index.js"
+        "index.js",
+        "index.d.ts",
+        "archive"
     ],
     "author": "SlimIO",
     "license": "MIT",
@@ -27,7 +29,11 @@
         "url": "https://github.com/SlimIO/agent-test-pack/issues"
     },
     "homepage": "https://github.com/SlimIO/agent-test-pack#readme",
-    "dependencies": {},
+    "dependencies": {
+        "@slimio/github": "^0.5.0",
+        "@slimio/manifest": "^0.7.1",
+        "tar-fs": "^2.0.0"
+    },
     "devDependencies": {
         "@commitlint/cli": "^8.1.0",
         "@commitlint/config-conventional": "^8.1.0",
