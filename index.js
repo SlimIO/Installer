@@ -27,6 +27,30 @@ const pipeline = promisify(stream.pipeline);
 
 /**
  * @async
+ * @function initAgent
+ * @param {!string} location
+ * @param {object} [options]
+ * @param {string} [options.token]
+ * @returns {Promise<string>}
+ */
+async function initAgent(location, options = {}) {
+    const { token = null } = options;
+
+    const agentDir = await extractAgent(location, {
+        name: "agent", token
+    });
+
+    await mkdir(join(agentDir, "addons"));
+    await Promise.all([
+        installDependencies(agentDir, true),
+        ...BUILT_IN_ADDONS.map((name) => installAddon(name, agentDir, { token }))
+    ]);
+
+    return agentDir;
+}
+
+/**
+ * @async
  * @function extractAgent
  * @param {!string} dest
  * @param {object} options
@@ -73,6 +97,27 @@ async function extractAgent(dest, options = {}) {
     }
 
     return join(dest, currentName);
+}
+
+/**
+ * @async
+ * @function runAgent
+ * @param {!string} location
+ * @param {boolean} [silent=true]
+ * @param {object} [options]
+ * @returns {Promise<void>}
+ */
+async function runAgent(location, silent = true, options = { stdio: "inherit" }) {
+    const cpArgs = [join(location, "index.js")];
+    if (silent) {
+        cpArgs.push("--silent");
+    }
+
+    cp = spawn(process.argv[0], cpArgs, options);
+    cp.on("error", (err) => console.error(err));
+
+    // Wait a little bit (else the agent will not be yet started).
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 }
 
 /**
@@ -151,7 +196,9 @@ async function installAddon(addonName, dest, options = {}) {
 }
 
 module.exports = {
+    initAgent,
     extractAgent,
+    runAgent,
     renameDirFromManifest,
     installDependencies,
     installAddon,
