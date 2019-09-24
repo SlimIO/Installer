@@ -1,7 +1,7 @@
 {
-    "name": "@slimio/agent-test-pack",
+    "name": "@slimio/installer",
     "version": "0.1.0",
-    "description": "TBC",
+    "description": "SlimIO Agent and Addons installer",
     "main": "index.js",
     "scripts": {
         "start": "node index.js",

@@ -9,7 +9,7 @@ const { spawn } = require("child_process");
 const stream = require("stream");
 
 // Require Third-party Dependencies
-const github = require("@slimio/github");
+const downloadGithub = require("@slimio/github");
 const tar = require("tar-fs");
 const Manifest = require("@slimio/manifest");
 
@@ -20,7 +20,7 @@ const { hasPackageLock } = require("./src/utils");
 const AGENT_ARCHIVE = join(__dirname, "archive", "Agent-master.tar.gz");
 const AGENT_REMOTE_NAME = "SlimIO.Agent";
 const EXEC_SUFFIX = process.platform === "win32";
-const BUILT_IN_ADDONS = Object.freeze(["Events", "Socket", "Gate", "Alerting"]);
+const BUILT_IN_ADDONS = Object.freeze(["Events", "Socket", "Gate", "Alerting", "Aggregator"]);
 
 // ASYNC
 const pipeline = promisify(stream.pipeline);
@@ -54,7 +54,7 @@ async function extractAgent(dest, options = {}) {
         if (typeof token === "string") {
             config.auth = token;
         }
-        currentName = await github(AGENT_REMOTE_NAME, config);
+        currentName = await downloadGithub(AGENT_REMOTE_NAME, config);
     }
     else {
         await pipeline(
@@ -120,25 +120,28 @@ async function renameDirFromManifest(dir = process.cwd(), fileName = "slimio.tom
  * @param {object} [options]
  * @param {boolean} [options.installDependencies=true]
  * @param {boolean} [options.forceMkdir=true]
+ * @param {string} [options.token]
  * @returns {Promise<void>}
  */
 async function installAddon(addonName, dest, options = {}) {
-    const { installDependencies = true, forceMkdir = true } = options;
+    const { installDependencies: iDep = true, forceMkdir = true, token } = options;
     if (forceMkdir) {
         await mkdir(dest, { recursive: true });
     }
 
-    const dirName = await download(`SlimIO.${addonName}`, {
-        dest, extract: true
-    });
+    const config = { dest, extract: true };
+    if (typeof token === "string") {
+        config.auth = token;
+    }
+    const dirName = await downloadGithub(`SlimIO.${addonName}`, config);
     const addonDir = await renameDirFromManifest(dirName);
 
-    if (installDependencies) {
+    if (iDep) {
         const absoluteAddonDir = join(dest, addonDir);
         const pkgLock = await hasPackageLock(absoluteAddonDir);
 
         await new Promise((resolve, reject) => {
-            const subProcess = npmInstall(absoluteAddonDir, pkgLock);
+            const subProcess = installDependencies(absoluteAddonDir, pkgLock);
             subProcess.once("close", resolve);
             subProcess.once("error", reject);
         });
