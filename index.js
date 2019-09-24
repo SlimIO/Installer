@@ -14,7 +14,7 @@ const tar = require("tar-fs");
 const Manifest = require("@slimio/manifest");
 
 // Require Internal Dependencies
-const { hasPackageLock } = require("./src/utils");
+const { hasPackageLock } = require("./src/utils.js");
 
 // CONSTANTS
 const AGENT_ARCHIVE = join(__dirname, "archive", "Agent-master.tar.gz");
