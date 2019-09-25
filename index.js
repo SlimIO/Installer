@@ -36,17 +36,22 @@ const pipeline = promisify(stream.pipeline);
  * @param {object} [options]
  * @param {string} [options.token]
  * @param {string} [options.name="agent"]
+ * @param {string} [options.forceClean=true]
  * @returns {Promise<string>}
  */
 async function initAgent(location, options = {}) {
-    const { token = null, name = "agent" } = options;
+    const { token = null, name = "agent", forceClean = true } = options;
 
-    try {
-        await access(location);
-        await premove(location);
-    }
-    catch (error) {
-        // Ignore
+    if (forceClean) {
+        const tempDir = join(location, name);
+
+        try {
+            await access(tempDir);
+            await premove(tempDir);
+        }
+        catch (error) {
+            // Ignore
+        }
     }
 
     const agentDir = await extractAgent(location, { name, token });

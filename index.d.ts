@@ -15,6 +15,7 @@ declare namespace Installer {
     interface InitOptions {
         token?: string;
         name?: string;
+        forceClean?: boolean;
     }
 
     export function initAgent(location: string, options?: InitOptions): Promise<string>;
