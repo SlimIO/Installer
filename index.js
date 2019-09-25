@@ -122,7 +122,7 @@ async function extractAgent(dest, options = {}) {
  * @param {!string} location
  * @param {boolean} [silent=true]
  * @param {object} [options]
- * @returns {Promise<void>}
+ * @returns {Promise<NodeJS.ReadStream>}
  */
 async function runAgent(location, silent = true, options = { stdio: "inherit" }) {
     const cpArgs = [join(location, "index.js")];
@@ -130,11 +130,13 @@ async function runAgent(location, silent = true, options = { stdio: "inherit" })
         cpArgs.push("--silent");
     }
 
-    cp = spawn(process.argv[0], cpArgs, options);
+    const cp = spawn(process.argv[0], cpArgs, options);
     cp.on("error", (err) => console.error(err));
 
     // Wait a little bit (else the agent will not be yet started).
     await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    return cp;
 }
 
 /**
