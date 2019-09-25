@@ -12,7 +12,12 @@ declare namespace Installer {
         token?: string;
     }
 
-    export function initAgent(location: string, options?: { token: string }): Promise<string>;
+    interface InitOptions {
+        token?: string;
+        name?: string;
+    }
+
+    export function initAgent(location: string, options?: InitOptions): Promise<string>;
     export function runAgent(location: string, silent?: boolean, options?: object): Promise<void>;
     export function installDependencies(cwd?: string, lock?: boolean): NodeJS.ReadableStream;
     export function renameDirFromManifest(dir?: string, fileName?: string): Promise<string>;

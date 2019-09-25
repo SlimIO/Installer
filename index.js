@@ -2,16 +2,20 @@
 
 // Require Node.js Dependencies
 const { promisify } = require("util");
-const { createReadStream, promises: { mkdir, rename } } = require("fs");
 const { join, sep } = require("path");
 const { createGunzip } = require("zlib");
 const { spawn } = require("child_process");
 const stream = require("stream");
+const {
+    createReadStream,
+    promises: { mkdir, rename, access }
+} = require("fs");
 
 // Require Third-party Dependencies
 const downloadGithub = require("@slimio/github");
 const tar = require("tar-fs");
 const Manifest = require("@slimio/manifest");
+const premove = require("premove");
 
 // Require Internal Dependencies
 const { hasPackageLock } = require("./src/utils.js");
@@ -31,14 +35,21 @@ const pipeline = promisify(stream.pipeline);
  * @param {!string} location
  * @param {object} [options]
  * @param {string} [options.token]
+ * @param {string} [options.name="agent"]
  * @returns {Promise<string>}
  */
 async function initAgent(location, options = {}) {
-    const { token = null } = options;
+    const { token = null, name = "agent" } = options;
 
-    const agentDir = await extractAgent(location, {
-        name: "agent", token
-    });
+    try {
+        await access(location);
+        await premove(location);
+    }
+    catch (error) {
+        // Ignore
+    }
+
+    const agentDir = await extractAgent(location, { name, token });
 
     const addonsDir = join(agentDir, "addons");
     await mkdir(addonsDir, { recursive: true });
