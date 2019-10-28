@@ -33,7 +33,6 @@
     "dependencies": {
         "@slimio/github": "^0.5.0",
         "@slimio/manifest": "^0.7.1",
-        "premove": "^1.0.0",
         "tar-fs": "^2.0.0"
     },
     "devDependencies": {

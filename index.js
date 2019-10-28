@@ -8,14 +8,13 @@ const { spawn } = require("child_process");
 const stream = require("stream");
 const {
     createReadStream,
-    promises: { mkdir, rename, access }
+    promises: { mkdir, rmdir, rename, access }
 } = require("fs");
 
 // Require Third-party Dependencies
 const downloadGithub = require("@slimio/github");
 const tar = require("tar-fs");
 const Manifest = require("@slimio/manifest");
-const premove = require("premove");
 
 // Require Internal Dependencies
 const { hasPackageLock } = require("./src/utils.js");
@@ -47,7 +46,7 @@ async function initAgent(location, options = {}) {
 
         try {
             await access(tempDir);
-            await premove(tempDir);
+            await rmdir(tempDir, { recursive: true });
         }
         catch (error) {
             // Ignore
