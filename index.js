@@ -124,7 +124,7 @@ async function extractAgent(dest, options = {}) {
  * @returns {Promise<NodeJS.ReadStream>}
  */
 async function runAgent(location, silent = true, options = { stdio: "inherit" }) {
-    const cpArgs = [join(location, "index.js")];
+    const cpArgs = ["--experimental-modules", join(location, "index.js")];
     if (silent) {
         cpArgs.push("--silent");
     }
