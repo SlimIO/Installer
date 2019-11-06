@@ -7,7 +7,8 @@
         "start": "node index.js",
         "prepublishOnly": "pkg-ok",
         "doc": "jsdoc -c ./jsdoc.json -r -R ./README.md -P ./package.json --verbose",
-        "test": "cross-env psp && jest --coverage"
+        "test": "cross-env psp && jest --coverage",
+        "update-archive": "node scripts/updateArchives.js"
     },
     "repository": {
         "type": "git",
