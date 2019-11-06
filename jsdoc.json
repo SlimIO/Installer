@@ -8,7 +8,8 @@
     "source": {
         "include": [
             "index.js",
-            "src/utils.js"
+            "src/utils.js",
+            "scripts/updateArchives.js"
         ],
         "exclude": [
             "node_modules",
