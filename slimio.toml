@@ -1,3 +1,6 @@
 name = "installer"
 version = "0.3.1"
 type = "Package"
+
+[psp]
+exclude=["archive"]
