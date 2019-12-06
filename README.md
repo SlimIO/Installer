@@ -5,6 +5,7 @@
 ![dep](https://img.shields.io/david/SlimIO/Installer)
 ![size](https://img.shields.io/github/languages/code-size/SlimIO/Installer)
 ![known vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/SlimIO/Installer)
+[![Build Status](https://travis-ci.com/SlimIO/Installer.svg?branch=master)](https://travis-ci.com/SlimIO/Installer)
 
 SlimIO Agent and Addons installer utilities.
 
