@@ -12,9 +12,10 @@ const {
 } = require("fs");
 
 // Require Third-party Dependencies
-const downloadGithub = require("@slimio/github");
 const tar = require("tar-fs");
+const github = require("@slimio/github");
 const Manifest = require("@slimio/manifest");
+const registry = require("@slimio/registry-sdk");
 
 // Require Internal Dependencies
 const { hasPackageLock } = require("./src/utils.js");
@@ -24,6 +25,7 @@ const AGENT_ARCHIVE = join(__dirname, "archive", "Agent-master.tar.gz");
 const AGENT_REMOTE_NAME = "SlimIO.Agent";
 const EXEC_SUFFIX = process.platform === "win32";
 const BUILT_IN_ADDONS = Object.freeze(["Events", "Socket", "Gate", "Alerting", "Aggregator"]);
+const DEFAULT_ORG_NAME = "SlimIO";
 
 // ASYNC
 const pipeline = promisify(stream.pipeline);
@@ -94,7 +96,7 @@ async function extractAgent(dest, options = {}) {
         if (typeof token === "string") {
             config.auth = token;
         }
-        currentName = await downloadGithub(AGENT_REMOTE_NAME, config);
+        currentName = await github(AGENT_REMOTE_NAME, config);
     }
     else {
         await pipeline(
@@ -176,27 +178,78 @@ async function renameDirFromManifest(dir = process.cwd(), fileName = "slimio.tom
 }
 
 /**
+ * @function parseAddonExpr
+ * @param {!string} addonExpr
+ * @returns {[string, string]}
+ *
+ * @throws {Error}
+ *
+ * @example
+ * parseAddonExpr("https://github.com/SlimIO/Socket"); // ["SlimIO", "Socket"]
+ * parseAddonExpr("Socket"); // ["SlimIO", "Socket"]
+ * parseAddonExpr("Foo/Socket"); // ["Foo", "Socket"]
+ */
+function parseAddonExpr(addonExpr) {
+    try {
+        const gitURL = new URL(addonExpr);
+        if (gitURL.host !== "github.com") {
+            throw new Error("Only github.com is supported as host!");
+        }
+
+        return gitURL.pathname.split("/", 3).slice(1);
+    }
+    catch (error) {
+        if (!addonExpr.indexOf("/") === -1) {
+            return [DEFAULT_ORG_NAME, addonExpr];
+        }
+
+        return addonExpr.split("/", 2);
+    }
+}
+
+/**
+ * @function setRegistryURL
+ * @description set a new SlimIO Registry URL
+ * @param {!URL} url WHATWG URL
+ * @returns {void}
+ *
+ * @throws {TypeError}
+ */
+function setRegistryURL(url) {
+    if (!(url instanceof URL)) {
+        throw new TypeError("url must be an instanceof WHATWG URL");
+    }
+
+    registry.constants.registry_url = url;
+}
+
+/**
  * @async
  * @function installAddon
- * @param {!string} addonName
+ * @param {!string} addonExpr
  * @param {!string} dest
  * @param {object} [options]
  * @param {boolean} [options.installDependencies=true]
  * @param {boolean} [options.forceMkdir=true]
+ * @param {boolean} [options.searchInRegistry=false]
  * @param {string} [options.token]
  * @returns {Promise<string>}
  */
-async function installAddon(addonName, dest, options = {}) {
-    const { installDependencies: iDep = true, forceMkdir = true, token } = options;
+async function installAddon(addonExpr, dest, options = {}) {
+    const { installDependencies: iDep = true, searchInRegistry = false, forceMkdir = true, token } = options;
     if (forceMkdir) {
         await mkdir(dest, { recursive: true });
     }
 
-    const config = { dest, extract: true };
-    if (typeof token === "string") {
-        config.auth = token;
+    if (searchInRegistry) {
+        const addonInfos = await registry.getOneAddon(addonExpr);
+        // eslint-disable-next-line no-param-reassign
+        addonExpr = addonInfos.git;
     }
-    const dirName = await downloadGithub(`SlimIO.${addonName}`, config);
+    const [repoUserOrg, repoName] = parseAddonExpr(addonExpr);
+
+    const config = Object.assign({ dest, extract: true }, typeof token === "string" ? { auth: token } : {});
+    const dirName = await github(`${repoUserOrg}.${repoName}`, config);
     const addonDir = await renameDirFromManifest(dirName);
 
     if (iDep) {
@@ -215,6 +268,8 @@ async function installAddon(addonName, dest, options = {}) {
 
 module.exports = {
     initAgent,
+    setRegistryURL,
+    parseAddonExpr,
     extractAgent,
     runAgent,
     renameDirFromManifest,
