@@ -1,14 +1,14 @@
 "use strict";
 
 // Require Node.js Dependencies
+const stream = require("stream");
 const { promisify } = require("util");
 const { join, sep } = require("path");
 const { createGunzip } = require("zlib");
 const { spawn } = require("child_process");
-const stream = require("stream");
 const {
     createReadStream,
-    promises: { mkdir, rmdir, rename, access }
+    promises: { mkdir, rmdir, rename }
 } = require("fs");
 
 // Require Third-party Dependencies
@@ -41,28 +41,19 @@ const spawnAsync = promisify(spawn);
  * @param {string} [options.forceClean=true]
  * @returns {Promise<string>}
  */
-async function initAgent(location, options = {}) {
+async function initAgent(location, options = Object.create(null)) {
     const { token = null, name = "agent", forceClean = true } = options;
-
     if (forceClean) {
-        const tempDir = join(location, name);
-
-        try {
-            await access(tempDir);
-            await rmdir(tempDir, { recursive: true });
-        }
-        catch (error) {
-            // Ignore
-        }
+        await rmdir(join(location, name), { recursive: true });
     }
 
     const agentDir = await extractAgent(location, { name, token });
-
     const addonsDir = join(agentDir, "addons");
+
     await mkdir(addonsDir, { recursive: true });
     await Promise.all([
         installDependencies(agentDir, true),
-        ...BUILT_IN_ADDONS.map((name) => installAddon(name, addonsDir, { token }))
+        ...BUILT_IN_ADDONS.map((addonName) => installAddon(addonName, addonsDir, { token }))
     ]);
 
     return agentDir;
