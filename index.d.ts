@@ -19,7 +19,7 @@ declare namespace Installer {
 
     export function initAgent(location: string, options?: InitOptions): Promise<string>;
     export function runAgent(location: string, silent?: boolean, options?: object): Promise<NodeJS.ReadStream>;
-    export function installDependencies(cwd?: string, lock?: boolean): NodeJS.ReadableStream;
+    export function installDependencies(cwd?: string, lock?: boolean): Promise<void>;
     export function renameDirFromManifest(dir?: string, fileName?: string): Promise<string>;
     export function extractAgent(dest: string, options?: ExtractOptions): Promise<string>;
     export function installAddon(addonName: string, dest: string, options?: InstallOptions): Promise<string>;

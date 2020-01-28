@@ -35,6 +35,7 @@
             "index.js",
           "**/src/**/*.js"
         ],
+        "setupFilesAfterEnv": ["./jest.setup.js"],
         "testEnvironment": "node",
         "testMatch": [
           "**/test/**/*.js"

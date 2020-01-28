@@ -9,7 +9,8 @@
         "include": [
             "index.js",
             "src/utils.js",
-            "scripts/updateArchives.js"
+            "scripts/updateArchives.js",
+            "jest.setup.js"
         ],
         "exclude": [
             "node_modules",

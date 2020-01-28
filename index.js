@@ -29,6 +29,7 @@ const DEFAULT_ORG_NAME = "SlimIO";
 
 // ASYNC
 const pipeline = promisify(stream.pipeline);
+const spawnAsync = promisify(spawn);
 
 /**
  * @async
@@ -137,17 +138,16 @@ async function runAgent(location, silent = true, options = { stdio: "inherit" })
 }
 
 /**
+ * @async
  * @function installDependencies
  * @param {!string} cwd working dir where we need to run the npm install cmd
  * @param {boolean} [lock=false] install with package.lock (npm ci)
- * @returns {NodeJS.ReadableStream}
+ * @returns {Promise<void>}
  */
-function installDependencies(cwd = process.cwd(), lock = false) {
-    const ci = lock ? ["ci", "--only=production"] : ["install", "--production"];
+async function installDependencies(cwd = process.cwd(), lock = false) {
+    const cmdArgs = lock ? ["ci", "--only=production"] : ["install", "--production"];
 
-    return spawn(`npm${EXEC_SUFFIX ? ".cmd" : ""}`, ci, {
-        cwd, stdio: "pipe"
-    });
+    await spawnAsync(`npm${EXEC_SUFFIX ? ".cmd" : ""}`, cmdArgs, { cwd });
 }
 
 /**
@@ -252,11 +252,7 @@ async function installAddon(addonExpr, dest, options = {}) {
         const absoluteAddonDir = join(dest, addonDir);
         const pkgLock = await hasPackageLock(absoluteAddonDir);
 
-        await new Promise((resolve, reject) => {
-            const subProcess = installDependencies(absoluteAddonDir, pkgLock);
-            subProcess.once("close", resolve);
-            subProcess.once("error", reject);
-        });
+        await installDependencies(absoluteAddonDir, pkgLock);
     }
 
     return addonDir;
