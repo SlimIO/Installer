@@ -72,10 +72,9 @@ async function initAgent(location, options = {}) {
  * @function extractAgent
  * @param {!string} dest
  * @param {object} options
- * @param {boolean} [options.downloadFromRemote=false]
- * @param {boolean} [options.forceMkdir=true]
- * @param {string} [options.token]
- * @param {string} [options.name]
+ * @param {boolean} [options.downloadFromRemote=false] download from remote github repository (or from a local archive)
+ * @param {string} [options.token] github token
+ * @param {string} [options.name] repository name (on the local system).
  * @returns {Promise<string>}
  *
  * @throws {TypeError}
@@ -84,11 +83,8 @@ async function extractAgent(dest, options = {}) {
     if (typeof dest !== "string") {
         throw new TypeError("dest must be a string");
     }
-    const { downloadFromRemote = false, forceMkdir = true, token, name } = options;
-
-    if (forceMkdir) {
-        await mkdir(dest, { recursive: true });
-    }
+    const { downloadFromRemote = false, token, name } = options;
+    await mkdir(dest, { recursive: true });
 
     let currentName = "";
     if (downloadFromRemote) {
@@ -114,7 +110,7 @@ async function extractAgent(dest, options = {}) {
         return finalPath;
     }
 
-    return join(dest, currentName);
+    return currentName;
 }
 
 /**
@@ -163,18 +159,17 @@ function installDependencies(cwd = process.cwd(), lock = false) {
  * @returns {Promise<string>}
  */
 async function renameDirFromManifest(dir = process.cwd(), fileName = "slimio.toml") {
+    let name;
     try {
-        const { name } = Manifest.open(join(dir, fileName));
-        await rename(dir, join(dir, "..", name));
-
-        return name;
+        ({ name } = Manifest.open(join(dir, fileName)));
     }
-    catch (err) {
-        const [addonName] = dir.split(sep).pop().split("-");
-        await rename(dir, addonName);
-
-        return addonName;
+    catch (error) {
+        ([name] = dir.split(sep).pop().split("-"));
     }
+    const addonName = join(dir, "..", name);
+    await rename(dir, addonName);
+
+    return addonName;
 }
 
 /**
@@ -234,16 +229,13 @@ function setRegistryURL(url) {
  * @param {!string} dest
  * @param {object} [options]
  * @param {boolean} [options.installDependencies=true]
- * @param {boolean} [options.forceMkdir=true]
  * @param {boolean} [options.searchInRegistry=false]
  * @param {string} [options.token]
  * @returns {Promise<string>}
  */
 async function installAddon(addonExpr, dest, options = {}) {
-    const { installDependencies: iDep = true, searchInRegistry = false, forceMkdir = true, token } = options;
-    if (forceMkdir) {
-        await mkdir(dest, { recursive: true });
-    }
+    const { installDependencies: iDep = true, searchInRegistry = false, token } = options;
+    await mkdir(dest, { recursive: true });
 
     if (searchInRegistry) {
         const addonInfos = await registry.getOneAddon(addonExpr);

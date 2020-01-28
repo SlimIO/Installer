@@ -1,7 +1,6 @@
 declare namespace Installer {
     interface ExtractOptions {
         downloadFromRemote?: boolean;
-        forceMkdir?: boolean;
         token?: string;
         name?: string;
     }
@@ -9,7 +8,6 @@ declare namespace Installer {
     interface InstallOptions {
         installDependencies?: boolean;
         searchInRegistry?: boolean;
-        forceMkdir?: boolean;
         token?: string;
     }
 

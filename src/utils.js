@@ -1,6 +1,7 @@
 "use strict";
 
 // Require Node.js Dependencies
+const { join } = require("path");
 const { access } = require("fs").promises;
 
 /**
