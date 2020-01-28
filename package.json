@@ -30,6 +30,19 @@
     "bugs": {
         "url": "https://github.com/SlimIO/agent-test-pack/issues"
     },
+    "jest": {
+        "collectCoverageFrom": [
+          "**/src/**/*.js"
+        ],
+        "testEnvironment": "node",
+        "testMatch": [
+          "**/test/**/*.js"
+        ],
+        "testPathIgnorePatterns": [
+          "/node_modules/",
+          "/test/fixtures/"
+        ]
+      },
     "homepage": "https://github.com/SlimIO/agent-test-pack#readme",
     "dependencies": {
         "@slimio/github": "^0.5.0",

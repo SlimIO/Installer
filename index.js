@@ -199,7 +199,11 @@ function parseAddonExpr(addonExpr) {
         return gitURL.pathname.split("/", 3).slice(1);
     }
     catch (error) {
-        if (!addonExpr.indexOf("/") === -1) {
+        if (error.code !== "ERR_INVALID_URL") {
+            throw error;
+        }
+
+        if (addonExpr.indexOf("/") === -1) {
             return [DEFAULT_ORG_NAME, addonExpr];
         }
 
