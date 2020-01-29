@@ -240,10 +240,9 @@ async function installAddon(addonExpr, dest, options = {}) {
     const addonDir = await renameDirFromManifest(dirName);
 
     if (iDep) {
-        const absoluteAddonDir = join(dest, addonDir);
-        const pkgLock = await hasPackageLock(absoluteAddonDir);
+        const pkgLock = await hasPackageLock(addonDir);
 
-        await installDependencies(absoluteAddonDir, pkgLock);
+        await installDependencies(addonDir, pkgLock);
     }
 
     return addonDir;
