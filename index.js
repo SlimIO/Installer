@@ -5,7 +5,7 @@ const stream = require("stream");
 const { promisify } = require("util");
 const { join, sep } = require("path");
 const { createGunzip } = require("zlib");
-const { spawn } = require("child_process");
+const { execFile } = require("child_process");
 const {
     createReadStream,
     promises: { mkdir, rmdir, rename }
@@ -29,7 +29,7 @@ const DEFAULT_ORG_NAME = "SlimIO";
 
 // ASYNC
 const pipeline = promisify(stream.pipeline);
-const spawnAsync = promisify(spawn);
+const execFileAsync = promisify(execFile);
 
 /**
  * @async
@@ -138,7 +138,7 @@ async function runAgent(location, silent = true, options = { stdio: "inherit" })
 async function installDependencies(cwd = process.cwd(), lock = false) {
     const cmdArgs = lock ? ["ci", "--only=production"] : ["install", "--production"];
 
-    await spawnAsync(`npm${EXEC_SUFFIX ? ".cmd" : ""}`, cmdArgs, { cwd });
+    await execFileAsync(`npm${EXEC_SUFFIX ? ".cmd" : ""}`, cmdArgs, { cwd });
 }
 
 /**

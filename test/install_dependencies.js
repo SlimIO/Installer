@@ -21,7 +21,7 @@ afterAll(async() => {
 });
 
 test("install npm dependencies of fixtures/installDeps", async() => {
-    expect.assertions(0);
-    // await installDependencies(kInstallDeps);
-    // await access(join(kInstallDeps, "node_modules"));
+    // expect.assertions(0);
+    await installDependencies(kInstallDeps);
+    await access(join(kInstallDeps, "node_modules"));
 });
