@@ -177,7 +177,7 @@ async function renameDirFromManifest(dir = process.cwd(), fileName = "slimio.tom
  */
 function parseAddonExpr(addonExpr) {
     try {
-        const gitURL = new URL(addonExpr);
+        const gitURL = addonExpr instanceof URL ? addonExpr : new URL(addonExpr);
         if (gitURL.host !== "github.com") {
             throw new Error("Only github.com is supported as host!");
         }
@@ -188,12 +188,13 @@ function parseAddonExpr(addonExpr) {
         if (error.code !== "ERR_INVALID_URL") {
             throw error;
         }
+        const newAddonExpr = addonExpr.replace(/[.]/g, "/");
 
-        if (addonExpr.indexOf("/") === -1) {
-            return [DEFAULT_ORG_NAME, addonExpr];
+        if (newAddonExpr.indexOf("/") === -1) {
+            return [DEFAULT_ORG_NAME, newAddonExpr];
         }
 
-        return addonExpr.split("/", 2);
+        return newAddonExpr.split("/", 2);
     }
 }
 

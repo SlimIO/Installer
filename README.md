@@ -70,20 +70,31 @@ main().catch(console.error);
 <br />
 
 This method will extract and install all required (built-in) addons for a SlimIO Agent.
+```ts
+interface InitOptions {
+    token?: string;
+    name?: string;
+    forceClean?: boolean;
+}
+```
+
+By default `forceClean` is equal to true (this mean that the code will try to remove any agent on the system!).
 
 </details>
 
 <details><summary>runAgent(location: string, silent?: boolean, options?: object): Promise< NodeJS.ReadStream ></summary>
 <br />
 
-Run a given SlimIO Agent in a dedicated child process.
+Run a given SlimIO Agent in a dedicated Node.js child process. Return the process Read Stream.
 
 </details>
 
-<details><summary>installDependencies(cwd?: string, lock?: boolean): NodeJS.ReadableStream</summary>
+<details><summary>installDependencies(cwd?: string, lock?: boolean): Promise< void ></summary>
 <br />
 
-Install the dependencies of a given Node.js project directory (it spawn a Node.js process to run npm install).
+Install the dependencies of a given Node.js project directory (it spawn a Node.js process to run the npm install / npm ci command). This command only install **production** dependencies (devDependencies are ignored).
+
+The current working dir value is `process.cwd()`.
 
 </details>
 
@@ -92,6 +103,8 @@ Install the dependencies of a given Node.js project directory (it spawn a Node.j
 
 Found the real addon name in the SlimIO manifest file and rename the directory name (because by default the directory name is the one from github which is a bad thing). This method is automatically used in **installAddon**.
 
+By default value of the **fileName** argument is `slimio.toml`. The current working dir value is `process.cwd()`.
+
 </details>
 
 <details><summary>extractAgent(dest: string, options?: ExtractOptions): Promise< string ></summary>
@@ -99,12 +112,61 @@ Found the real addon name in the SlimIO manifest file and rename the directory n
 
 Download the Agent archive on github (or extract a recent version stored in cache for performance). This method is used by **initAgent**.
 
+```ts
+interface ExtractOptions {
+    downloadFromRemote?: boolean;
+    token?: string;
+    name?: string;
+}
+```
+
+By default **downloadFromRemote** is equal to **true**.
+
 </details>
 
-<details><summary>installAddon(addonName: string, dest: string, options?: InstallOptions): Promise< string ></summary>
+<details><summary>installAddon(addonExpr: string, dest: string, options?: InstallOptions): Promise< string ></summary>
 <br />
 
 Install one Addon at the given destination (which must be a valid SlimIO Agent path).
+
+```ts
+interface InstallOptions {
+    installDependencies?: boolean;
+    searchInRegistry?: boolean;
+    token?: string;
+}
+```
+
+By default the dependencies of the addon will be installed. The **searchInRegistry** default value is **false**.
+
+```js
+await installAddon("SlimIO.Socket", "./myAgent");
+await installAddon("YourGithubOrg.AddonName", "./myAgent");
+await installAddon("Alerting", "./myAgent"); // Same as SlimIO.Alerting
+await installAddon("https://github.com/SlimIO/Aggregator", "./myAgent");
+```
+
+</details>
+
+<details><summary>parseAddonExpr(addonExpr: URL | string): [string, string]</summary>
+<br />
+
+Parse an Addon installation expression. The function try to guess the Organization and the Repository name by itself, if there is no org then it will return **SlimIO** as the default org.
+
+```js
+parseAddonExpr("https://github.com/SlimIO/Socket"); // ["SlimIO", "Socket"]
+parseAddonExpr(new URL("https://github.com/SlimIO/Aggregator")); // ["SlimIO", "Aggregator"]
+parseAddonExpr("Alerting"); // ["SlimIO", "Alerting"]
+parseAddonExpr("Foo/Socket"); // ["Foo", "Socket"]
+parseAddonExpr("Foo.Events"); // ["Foo", "Events"]
+```
+
+</details>
+
+<details><summary>setRegistryURL(url: URL): void</summary>
+<br />
+
+Configure the default registry URL used under the hood by the Registry SDK package.
 
 </details>
 
@@ -113,8 +175,9 @@ Install one Addon at the given destination (which must be a valid SlimIO Agent p
 |Name|Refactoring|Security Risk|Usage|
 |---|---|---|---|
 |[@slimio/github](https://github.com/SlimIO/github)|Minor|Medium|Download and extract github repositories|
-|[@slimio/manifest](https://github.com/SlimIO/Manifester#readme)|Minor|High|TBC|
-|[tar-fs](https://github.com/mafintosh/tar-fs)|Minor|High|TBC|
+|[@slimio/manifest](https://github.com/SlimIO/Manifester#readme)|Minor|Low|Read, Write and manage SlimIO manifest|
+|[@slimio/registry-sdk]()|Minor|Low|SlimIO Registry SDK|
+|[tar-fs](https://github.com/mafintosh/tar-fs)|Minor|High|fs bindings for tar-stream|
 
 ## License
 MIT
