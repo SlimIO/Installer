@@ -8,7 +8,12 @@
 [![Build Status](https://travis-ci.com/SlimIO/Installer.svg?branch=master)](https://travis-ci.com/SlimIO/Installer)
 [![Greenkeeper badge](https://badges.greenkeeper.io/SlimIO/Installer.svg)](https://greenkeeper.io/)
 
-SlimIO Agent and Addons installer utilities.
+SlimIO Agent and Addons installer. We use this package in:
+
+- the [CLI](https://github.com/SlimIO/CLI) to install and clone the agent and all addons.
+- [Tcp-SDK](https://github.com/SlimIO/Tcp-Sdk) for testing the communication with the Socket addon.
+
+This package has been designed to be used by Addons to achieve clean unit-testing (by re-cloning a complete agent).
 
 ## Requirements
 - [Node.js](https://nodejs.org/en/) v12 or higher
@@ -51,15 +56,15 @@ Or install SlimIO Addons in a valid SlimIO Agent directory.
 ```js
 const installer = require("@slimio/installer");
 
+// CONSTANTS
+const kAddonsToInstall = ["cpu", "MySQL"];
+
 async function main() {
-    const toInstall = ["cpu", "MySQL"];
     const agentDir = process.cwd();
 
-    for (const addonName of toInstall) {
-        await installer.installAddon(addonName, agentDir, {
-            forceMkdir: false
-        });
-    }
+    await Promise.allSettled(
+        kAddonsToInstall.map((addonName) => installer.installAddon(addonName, agentDir))
+    );
 }
 main().catch(console.error);
 ```
@@ -169,6 +174,15 @@ parseAddonExpr("Foo.Events"); // ["Foo", "Events"]
 Configure the default registry URL used under the hood by the Registry SDK package.
 
 </details>
+
+### CONSTANTS
+
+The list of builtin addons can be retrieved with the **CONSTANTS** object.
+```js
+const { CONSTANTS } = require("@slimio/installer");
+
+console.log(CONSTANTS.BUILT_IN_ADDONS);
+```
 
 ## Dependencies
 
