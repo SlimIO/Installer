@@ -1,4 +1,10 @@
+/// <reference types="@types/node" />
+
+import { ChildProcessWithoutNullStreams } from "child_process";
+
 declare namespace Installer {
+    type AddonExpr = URL | string;
+
     interface ExtractOptions {
         downloadFromRemote?: boolean;
         token?: string;
@@ -18,12 +24,12 @@ declare namespace Installer {
     }
 
     export function initAgent(location: string, options?: InitOptions): Promise<string>;
-    export function runAgent(location: string, silent?: boolean, options?: object): Promise<NodeJS.ReadStream>;
+    export function runAgent(location: string, silent?: boolean, options?: object): Promise<ChildProcessWithoutNullStreams>;
     export function installDependencies(cwd?: string, lock?: boolean): Promise<void>;
     export function renameDirFromManifest(dir?: string, fileName?: string): Promise<string>;
     export function extractAgent(dest: string, options?: ExtractOptions): Promise<string>;
-    export function installAddon(addonName: string, dest: string, options?: InstallOptions): Promise<string>;
-    export function parseAddonExpr(addonExpr: URL | string): [string, string];
+    export function installAddon(addonExpr: AddonExpr, dest: string, options?: InstallOptions): Promise<string>;
+    export function parseAddonExpr(addonExpr: AddonExpr): [string, string];
     export function setRegistryURL(url: URL): void;
 
     export namespace CONSTANTS {

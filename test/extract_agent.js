@@ -22,7 +22,6 @@ afterAll(async() => {
     await rmdir(kSampleAgentDir3, { recursive: true });
 });
 
-
 test("extract an agent (with local archived version)", async() => {
     const agentDir = await extractAgent(kSampleAgentDir1, { downloadFromRemote: false });
     await access(kSampleAgentDir1);
@@ -51,4 +50,15 @@ test("extract an agent and rename it", async() => {
     await access(agentDir);
 
     expect(basename(agentDir)).toStrictEqual("foobar");
+});
+
+test("extract an agent (destination must be a string)", async() => {
+    expect.assertions(1);
+
+    try {
+        await extractAgent(10);
+    }
+    catch (error) {
+        expect(error.message).toStrictEqual("dest must be a string");
+    }
 });

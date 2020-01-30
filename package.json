@@ -33,18 +33,20 @@
     "jest": {
         "collectCoverageFrom": [
             "index.js",
-          "**/src/**/*.js"
+            "**/src/**/*.js"
         ],
-        "setupFilesAfterEnv": ["./jest.setup.js"],
+        "setupFilesAfterEnv": [
+            "./jest.setup.js"
+        ],
         "testEnvironment": "node",
         "testMatch": [
-          "**/test/**/*.js"
+            "**/test/**/*.js"
         ],
         "testPathIgnorePatterns": [
-          "/node_modules/",
-          "/test/fixtures/"
+            "/node_modules/",
+            "/test/fixtures/"
         ]
-      },
+    },
     "homepage": "https://github.com/SlimIO/agent-test-pack#readme",
     "dependencies": {
         "@slimio/github": "^0.5.0",
@@ -58,12 +60,15 @@
         "@escommunity/minami": "^1.0.0",
         "@slimio/eslint-config": "^4.0.0",
         "@slimio/psp": "^0.10.0",
+        "@slimio/tcp-sdk": "^0.4.6",
+        "@types/node": "^13.5.2",
         "cross-env": "^6.0.3",
         "eslint": "^6.8.0",
         "husky": "^4.0.10",
         "jest": "^24.9.0",
         "jsdoc": "^3.6.3",
-        "pkg-ok": "^2.3.1"
+        "pkg-ok": "^2.3.1",
+        "treekill": "^1.0.0"
     },
     "engines": {
         "node": ">=12"

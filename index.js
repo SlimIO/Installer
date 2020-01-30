@@ -5,7 +5,7 @@ const stream = require("stream");
 const { promisify } = require("util");
 const { join, sep } = require("path");
 const { createGunzip } = require("zlib");
-const { execFile } = require("child_process");
+const { spawn, execFile } = require("child_process");
 const {
     createReadStream,
     promises: { mkdir, rmdir, rename }
@@ -71,7 +71,7 @@ async function initAgent(location, options = Object.create(null)) {
  *
  * @throws {TypeError}
  */
-async function extractAgent(dest, options = {}) {
+async function extractAgent(dest, options = Object.create(null)) {
     if (typeof dest !== "string") {
         throw new TypeError("dest must be a string");
     }
@@ -80,11 +80,7 @@ async function extractAgent(dest, options = {}) {
 
     let currentName = "";
     if (downloadFromRemote) {
-        const config = { dest, extract: true };
-        if (typeof token === "string") {
-            config.auth = token;
-        }
-        currentName = await github(AGENT_REMOTE_NAME, config);
+        currentName = await github(AGENT_REMOTE_NAME, { dest, extract: true, token });
     }
     else {
         await pipeline(
@@ -120,6 +116,7 @@ async function runAgent(location, silent = true, options = { stdio: "inherit" })
     }
 
     const cp = spawn(process.argv[0], cpArgs, options);
+    /* istanbul ignore next */
     cp.on("error", (err) => console.error(err));
 
     // Wait a little bit (else the agent will not be yet started).
@@ -225,7 +222,7 @@ function setRegistryURL(url) {
  * @param {string} [options.token]
  * @returns {Promise<string>}
  */
-async function installAddon(addonExpr, dest, options = {}) {
+async function installAddon(addonExpr, dest, options = Object.create(null)) {
     const { installDependencies: iDep = true, searchInRegistry = false, token } = options;
     await mkdir(dest, { recursive: true });
 
