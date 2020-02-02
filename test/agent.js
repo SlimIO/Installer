@@ -2,7 +2,7 @@
 
 // Require Node.js Dependencies
 const { join } = require("path");
-const { rmdir, access, readdir } = require("fs").promises;
+const { rmdir, access, readdir, writeFile } = require("fs").promises;
 
 // Require Third-party Dependencies
 const treekill = require("treekill");
@@ -31,10 +31,16 @@ test("init and run an agent", async() => {
     const files = await readdir(addonsDir);
     expect(files.length).toStrictEqual(CONSTANTS.BUILT_IN_ADDONS.length);
 
+    const port = 2000;
+    await writeFile(join(addonsDir, "socket", "config.json"), JSON.stringify({
+        verbose: false,
+        port
+    }));
     const cp = await runAgent(agentDir, true);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     try {
-        const client = new tcpSDK();
+        const client = new tcpSDK({ port });
         await client.once("connect", 1000);
 
         try {
