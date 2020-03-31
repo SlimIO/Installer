@@ -52,7 +52,7 @@
         "@slimio/github": "^0.5.0",
         "@slimio/manifest": "^0.9.1",
         "@slimio/registry-sdk": "^0.3.0",
-        "tar-fs": "^2.0.0"
+        "tar-fs": "^2.0.1"
     },
     "devDependencies": {
         "@commitlint/cli": "^8.3.5",
