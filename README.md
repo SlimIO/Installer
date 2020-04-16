@@ -153,17 +153,25 @@ await installAddon("https://github.com/SlimIO/Aggregator", "./myAgent");
 
 </details>
 
-<details><summary>parseAddonExpr(addonExpr: URL | string): [string, string]</summary>
+<details><summary>parseAddonExpr(addonExpr: URL | string): ExprResult</summary>
 <br />
 
-Parse an Addon installation expression. The function try to guess the Organization and the Repository name by itself, if there is no org then it will return **SlimIO** as the default org.
+Parse an Addon installation expression. The function try to guess the Organization and the Repository name by itself, if there is no org then it will return **SlimIO** as the default org. The returned payload is described by the following TypeScript interface:
+
+```ts
+interface ExprResult {
+    repoUserOrg: string;
+    repoName: string;
+    host: null | string;
+}
+```
+
+Current supported host are `github.com` and `gitlab.com`.
 
 ```js
-parseAddonExpr("https://github.com/SlimIO/Socket"); // ["SlimIO", "Socket"]
-parseAddonExpr(new URL("https://github.com/SlimIO/Aggregator")); // ["SlimIO", "Aggregator"]
-parseAddonExpr("Alerting"); // ["SlimIO", "Alerting"]
-parseAddonExpr("Foo/Socket"); // ["Foo", "Socket"]
-parseAddonExpr("Foo.Events"); // ["Foo", "Events"]
+parseAddonExpr("https://github.com/SlimIO/Socket"); // { repoUserOrg: "SlimIO", repoName: "Socket", host: "github.com" }
+parseAddonExpr("Socket"); // { repoUserOrg: "SlimIO", repoName: "Socket", host: null }
+parseAddonExpr("Foo/Socket"); // { repoUserOrg: "Foo", repoName: "Socket", host: null }
 ```
 
 </details>
@@ -189,6 +197,7 @@ console.log(CONSTANTS.BUILT_IN_ADDONS);
 |Name|Refactoring|Security Risk|Usage|
 |---|---|---|---|
 |[@slimio/github](https://github.com/SlimIO/github)|Minor|Medium|Download and extract github repositories|
+|[@slimio/gitlab](https://github.com/SlimIO/gitlab#readme)|Minor|Medium|Download and extract gitlab repositories|
 |[@slimio/manifest](https://github.com/SlimIO/Manifester#readme)|Minor|Low|Read, Write and manage SlimIO manifest|
 |[@slimio/registry-sdk]()|Minor|Low|SlimIO Registry SDK|
 |[tar-fs](https://github.com/mafintosh/tar-fs)|Minor|High|fs bindings for tar-stream|

@@ -14,6 +14,7 @@ const {
 // Require Third-party Dependencies
 const tar = require("tar-fs");
 const github = require("@slimio/github");
+const gitlab = require("@slimio/gitlab");
 const Manifest = require("@slimio/manifest");
 const registry = require("@slimio/registry-sdk");
 
@@ -26,6 +27,7 @@ const AGENT_REMOTE_NAME = "SlimIO.Agent";
 const EXEC_SUFFIX = process.platform === "win32";
 const BUILT_IN_ADDONS = Object.freeze(["Events", "Socket", "Gate", "Alerting", "Aggregator"]);
 const DEFAULT_ORG_NAME = "SlimIO";
+const SUPPORTED_HOSTS = new Set(["github.com", "gitlab.com"]);
 
 // ASYNC
 const pipeline = promisify(stream.pipeline);
@@ -168,30 +170,35 @@ async function renameDirFromManifest(dir = process.cwd(), fileName = "slimio.tom
  * @throws {Error}
  *
  * @example
- * parseAddonExpr("https://github.com/SlimIO/Socket"); // ["SlimIO", "Socket"]
- * parseAddonExpr("Socket"); // ["SlimIO", "Socket"]
- * parseAddonExpr("Foo/Socket"); // ["Foo", "Socket"]
+ * parseAddonExpr("https://github.com/SlimIO/Socket"); // { repoUserOrg: "SlimIO", repoName: "Socket", host: "github.com" }
+ * parseAddonExpr("Socket"); // { repoUserOrg: "SlimIO", repoName: "Socket", host: null }
+ * parseAddonExpr("Foo/Socket"); // { repoUserOrg: "Foo", repoName: "Socket", host: null }
  */
 function parseAddonExpr(addonExpr) {
     try {
         const gitURL = addonExpr instanceof URL ? addonExpr : new URL(addonExpr);
-        if (gitURL.host !== "github.com") {
-            throw new Error("Only github.com is supported as host!");
+        const { host } = gitURL;
+        if (!SUPPORTED_HOSTS.has(host)) {
+            throw new Error(`Unsupported host '${host}'`);
         }
+        const [repoUserOrg, repoName] = gitURL.pathname.split("/", 3).slice(1);
 
-        return gitURL.pathname.split("/", 3).slice(1);
+        return {
+            repoUserOrg, repoName, host
+        };
     }
     catch (error) {
         if (error.code !== "ERR_INVALID_URL") {
             throw error;
         }
+
         const newAddonExpr = addonExpr.replace(/[.]/g, "/");
-
         if (newAddonExpr.indexOf("/") === -1) {
-            return [DEFAULT_ORG_NAME, newAddonExpr];
+            return { repoUserOrg: DEFAULT_ORG_NAME, repoName: newAddonExpr, host: null };
         }
+        const [repoUserOrg, repoName] = newAddonExpr.split("/", 2);
 
-        return newAddonExpr.split("/", 2);
+        return { repoUserOrg, repoName, host: null };
     }
 }
 
@@ -231,10 +238,11 @@ async function installAddon(addonExpr, dest, options = Object.create(null)) {
         // eslint-disable-next-line no-param-reassign
         addonExpr = addonInfos.git;
     }
-    const [repoUserOrg, repoName] = parseAddonExpr(addonExpr);
+    const { repoUserOrg, repoName, host } = parseAddonExpr(addonExpr);
 
     const config = Object.assign({ dest, extract: true }, typeof token === "string" ? { auth: token } : {});
-    const dirName = await github(`${repoUserOrg}.${repoName}`, config);
+    const hostMethod = host === "github.com" || host === null ? github : gitlab;
+    const dirName = await hostMethod(`${repoUserOrg}.${repoName}`, config);
     const addonDir = await renameDirFromManifest(dirName);
 
     if (iDep) {

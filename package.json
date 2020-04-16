@@ -50,6 +50,7 @@
     "homepage": "https://github.com/SlimIO/agent-test-pack#readme",
     "dependencies": {
         "@slimio/github": "^0.5.0",
+        "@slimio/gitlab": "^1.0.0",
         "@slimio/manifest": "^0.9.1",
         "@slimio/registry-sdk": "^0.3.0",
         "tar-fs": "^2.0.1"
