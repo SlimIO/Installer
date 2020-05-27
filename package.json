@@ -8,6 +8,7 @@
         "prepublishOnly": "pkg-ok",
         "doc": "jsdoc -c ./jsdoc.json -r -R ./README.md -P ./package.json --verbose",
         "test": "cross-env psp && jest --coverage",
+        "coverage": "codecov",
         "update-archive": "node scripts/updateArchives.js"
     },
     "repository": {
@@ -63,6 +64,7 @@
         "@slimio/psp": "^0.11.1",
         "@slimio/tcp-sdk": "^0.4.6",
         "@types/node": "^14.0.1",
+        "codecov": "^3.7.0",
         "cross-env": "^7.0.2",
         "eslint": "^7.0.0",
         "husky": "^4.2.5",
