@@ -37,6 +37,7 @@ test("init and run an agent", async() => {
         port
     }));
     const cp = await runAgent(agentDir, false);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     try {
         const client = new tcpSDK({ port });
